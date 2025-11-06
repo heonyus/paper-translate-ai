@@ -9,7 +9,8 @@ interface TranslationStore {
   isTranslating: boolean;
   currentPage: number;
   showTranslations: boolean;
-  
+  activeBlockId: string | null;
+
   setPdfFile: (file: File | null) => void;
   setPdfMetadata: (metadata: PDFMetadata | null) => void;
   addTranslation: (key: string, translation: Translation) => void;
@@ -19,6 +20,7 @@ interface TranslationStore {
   setIsTranslating: (isTranslating: boolean) => void;
   setCurrentPage: (page: number) => void;
   setShowTranslations: (show: boolean) => void;
+  setActiveBlockId: (blockId: string | null) => void;
   reset: () => void;
 }
 
@@ -30,9 +32,10 @@ export const useTranslationStore = create<TranslationStore>((set, get) => ({
   isTranslating: false,
   currentPage: 1,
   showTranslations: true,
-  
+  activeBlockId: null,
+
   setPdfFile: (file) => set({ pdfFile: file }),
-  
+
   setPdfMetadata: (metadata) => set({ pdfMetadata: metadata }),
   
   addTranslation: (key, translation) => {
@@ -56,11 +59,13 @@ export const useTranslationStore = create<TranslationStore>((set, get) => ({
   },
   
   setIsTranslating: (isTranslating) => set({ isTranslating }),
-  
+
   setCurrentPage: (page) => set({ currentPage: page }),
-  
+
   setShowTranslations: (show) => set({ showTranslations: show }),
-  
+
+  setActiveBlockId: (blockId) => set({ activeBlockId: blockId }),
+
   reset: () => set({
     pdfFile: null,
     pdfMetadata: null,
@@ -69,6 +74,7 @@ export const useTranslationStore = create<TranslationStore>((set, get) => ({
     isTranslating: false,
     currentPage: 1,
     showTranslations: true,
+    activeBlockId: null,
   }),
 }));
 

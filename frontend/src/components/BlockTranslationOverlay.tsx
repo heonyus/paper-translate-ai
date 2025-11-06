@@ -2,23 +2,26 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { MathRenderer } from './MathRenderer';
 import type { TextBlock } from '../types';
+import { useTranslationStore } from '../store/translationStore';
 
-interface BlockTranslationOverlayProps {
+interface TranslationCardProps {
   block: TextBlock;
-  scale: number;
   autoTranslate?: boolean;
+  onScrollToBlock?: (block: TextBlock) => void;
 }
 
 export function BlockTranslationOverlay({
   block,
-  scale,
   autoTranslate = true,
-}: BlockTranslationOverlayProps) {
+  onScrollToBlock,
+}: TranslationCardProps) {
   const { translate, isLoading } = useTranslation();
   const [translatedText, setTranslatedText] = useState<string>('');
   const [hasStarted, setHasStarted] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const copyResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { activeBlockId, setActiveBlockId } = useTranslationStore();
+  const isActive = activeBlockId === block.id;
 
   const label = useMemo(() => {
     switch (block.contentType) {
@@ -27,7 +30,7 @@ export function BlockTranslationOverlay({
       case 'TABLE':
         return '표';
       case 'IMAGE':
-        return '이미지 설명';
+        return '이미지';
       default:
         return '본문';
     }
@@ -81,43 +84,43 @@ export function BlockTranslationOverlay({
     }
   };
 
-  // 번역이 시작되지 않았으면 표시하지 않음
-  if (!hasStarted) {
-    return null;
-  }
-
-  // 스케일을 적용한 위치 계산
-  const style: React.CSSProperties = {
-    position: 'absolute',
-    left: `${block.x * scale}px`,
-    top: `${(block.y + block.height) * scale + 12}px`,
-    width: `${Math.max(block.width * scale, 260)}px`,
-    background:
-      'linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.86))',
-    padding: '18px 20px 20px',
-    borderRadius: '16px',
-    color: '#f8fafc',
-    zIndex: 20,
-    transition: 'transform 0.25s ease, box-shadow 0.3s ease',
-    pointerEvents: 'auto',
-    boxShadow:
-      '0 18px 45px -15px rgba(15, 23, 42, 0.75), 0 0 0 1px rgba(148, 163, 184, 0.18)',
-    backdropFilter: 'blur(10px)',
+  const handleActivate = () => {
+    setActiveBlockId(block.id);
+    onScrollToBlock?.(block);
   };
 
   return (
-    <div
-      style={style}
-      className="translation-overlay group hover:translate-y-[-2px] hover:shadow-[0_30px_60px_-30px_rgba(56,189,248,0.6)]"
+    <article
+      onMouseEnter={() => setActiveBlockId(block.id)}
+      onMouseLeave={() => {
+        if (activeBlockId === block.id) {
+          setActiveBlockId(null);
+        }
+      }}
+      onFocus={handleActivate}
+      onClick={handleActivate}
+      className={[
+        'group rounded-2xl border border-white/10 bg-slate-900/80 px-6 py-5 transition',
+        'shadow-[0_20px_40px_-20px_rgba(15,23,42,0.6)] backdrop-blur',
+        isActive ? 'border-sky-400/70 shadow-[0_35px_70px_-30px_rgba(56,189,248,0.6)]' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      tabIndex={0}
     >
-      <div className="mb-3 flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-sky-300">
-          {label}
-        </span>
-        <div className="flex items-center gap-2 text-xs text-slate-200">
+      <header className="mb-4 flex items-center justify-between">
+        <div>
+          <span className="text-[11px] font-semibold uppercase tracking-[0.32em] text-sky-300">
+            {label}
+          </span>
+          <p className="mt-1 text-xs text-slate-400">
+            페이지 {block.pageNum} · x:{Math.round(block.x)} y:{Math.round(block.y)}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-slate-300">
           {isLoading ? (
             <>
-              <span className="h-2 w-2 animate-ping rounded-full bg-sky-300" />
+              <span className="h-2 w-2 animate-pulse rounded-full bg-sky-300" />
               <span>번역 중...</span>
             </>
           ) : (
@@ -127,11 +130,11 @@ export function BlockTranslationOverlay({
             </>
           )}
         </div>
-      </div>
+      </header>
 
       <div className="space-y-3 text-sm leading-relaxed text-slate-100">
-        {isLoading ? (
-          <div className="flex items-center gap-2 text-xs text-slate-300">
+        {isLoading && !translatedText ? (
+          <div className="flex items-center gap-2 text-xs text-slate-400">
             <div className="h-3 w-3 animate-spin rounded-full border-2 border-slate-500 border-t-sky-400" />
             <span>문장을 정리하고 있습니다...</span>
           </div>
@@ -148,7 +151,7 @@ export function BlockTranslationOverlay({
         </p>
       </div>
 
-      <div className="mt-4 flex items-center justify-between text-[12px] text-slate-300">
+      <footer className="mt-4 flex items-center justify-between text-[12px] text-slate-300">
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -166,10 +169,14 @@ export function BlockTranslationOverlay({
             다시 번역
           </button>
         </div>
-        <span className="text-slate-400">
-          p.{block.pageNum} · {label}
-        </span>
-      </div>
-    </div>
+        <button
+          type="button"
+          onClick={handleActivate}
+          className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-slate-200 transition hover:border-sky-400 hover:text-sky-200"
+        >
+          원문 보기
+        </button>
+      </footer>
+    </article>
   );
 }
