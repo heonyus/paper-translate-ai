@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model PdfMetadata {
+  id          String   @id @default(cuid())
+  pdfHash     String   @unique @map("pdf_hash")
+  title       String?
+  totalPages  Int      @map("total_pages")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  translations Translation[]
+
+  @@map("pdf_metadata")
+}
+
+model Translation {
+  id              String      @id @default(cuid())
+  pdfHash         String      @map("pdf_hash")
+  pageNum         Int         @map("page_num")
+  contentHash     String      @map("content_hash")
+  originalText    String      @map("original_text")
+  translatedText  String      @map("translated_text")
+  contentType     ContentType @map("content_type")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  
+  pdf PdfMetadata @relation(fields: [pdfHash], references: [pdfHash], onDelete: Cascade)
+
+  @@unique([contentHash])
+  @@index([pdfHash, pageNum])
+  @@map("translations")
+}
+
+enum ContentType {
+  TEXT
+  MATH
+  TABLE
+  IMAGE
+}
+

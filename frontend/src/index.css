@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Immersive Translation Overlay Styles */
+.translation-overlay {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.translation-overlay:hover {
+  background-color: rgba(128, 128, 128, 0.12) !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* PDF Viewer Scrollbar Styling */
+.react-pdf__Page {
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+}
+
+.react-pdf__Page__textContent {
+  user-select: text;
+}
+
+.react-pdf__Page__annotations {
+  pointer-events: auto;
+}
