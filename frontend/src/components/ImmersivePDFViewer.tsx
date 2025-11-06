@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import type { PDFPageProxy } from 'pdfjs-dist/types/src/display/api';
 import { useTranslationStore } from '../store/translationStore';
 import { BlockTranslationOverlay } from './BlockTranslationOverlay';
 import { extractTextBlocks, detectImageRegions } from '../utils/pdfParser';
@@ -14,7 +15,6 @@ export function ImmersivePDFViewer() {
     pdfFile, 
     pdfMetadata, 
     setCurrentPage,
-    textBlocks,
     setTextBlocks,
     getTextBlocks,
     showTranslations,
@@ -29,7 +29,7 @@ export function ImmersivePDFViewer() {
   const [debugMode, setDebugMode] = useState<boolean>(false);
   const [extractError, setExtractError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const pageRef = useRef<any>(null);
+  const pageRef = useRef<PDFPageProxy | null>(null);
 
   useEffect(() => {
     setCurrentPage(pageNumber);
@@ -50,7 +50,7 @@ export function ImmersivePDFViewer() {
   }, []);
 
   // 페이지가 로드되면 텍스트 블록 추출
-  const handlePageLoadSuccess = async (page: any) => {
+  const handlePageLoadSuccess = async (page: PDFPageProxy) => {
     pageRef.current = page;
     setIsExtracting(true);
     
