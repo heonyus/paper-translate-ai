@@ -5,7 +5,7 @@ Image Handler Agent
 
 from langchain_openai import ChatOpenAI
 from langchain.schema import HumanMessage
-from prompts.translation_prompt import get_translation_prompt
+from prompts.image_prompt import get_image_translation_prompt
 
 
 class ImageHandler:
@@ -22,8 +22,8 @@ class ImageHandler:
         Returns:
             번역된 텍스트
         """
-        # 이미지 캡션은 일반 텍스트 번역과 유사하게 처리
-        prompt = get_translation_prompt(text)
+        # 이미지 특화 프롬프트 사용
+        prompt = get_image_translation_prompt(text)
         response = self.llm.invoke([HumanMessage(content=prompt)])
         
         translated = response.content.strip()

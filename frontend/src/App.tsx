@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PDFUpload } from './components/PDFUpload';
 import { ImmersivePDFViewer } from './components/ImmersivePDFViewer';
+import { ServerStatus } from './components/ServerStatus';
 import { useTranslationStore } from './store/translationStore';
 import { exportPDF } from './utils/api';
 
@@ -74,6 +75,9 @@ function App() {
           <p>Paper Translate AI - Academic Paper Translation with LangGraph</p>
         </div>
       </footer>
+
+      {/* 서버 상태 표시 */}
+      <ServerStatus />
     </div>
   );
 }
